@@ -81,6 +81,7 @@ schema and validation ranges.
 ## Endpoints
 
 - `GET /health`
+- `GET /healthz`
 - `POST /api/indoor`
 - `POST /api/outdoor`
 - `POST /api/survey-answer`

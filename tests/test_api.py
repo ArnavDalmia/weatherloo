@@ -44,6 +44,12 @@ def test_health(client: TestClient) -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_healthz(client: TestClient) -> None:
+    response = client.get("/healthz")
+    assert response.status_code == 200
+    assert response.text == "You did it, you beautiful baby"
+
+
 def test_valid_indoor_insertion(client: TestClient) -> None:
     response = client.post("/api/indoor", json=indoor_payload())
     assert response.status_code == 201

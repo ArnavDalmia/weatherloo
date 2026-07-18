@@ -11,7 +11,7 @@ from typing import Annotated, Any
 
 from fastapi import FastAPI, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 
 from app.config import Settings, load_settings
 from app.database import Database
@@ -70,6 +70,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @application.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
         return HealthResponse()
+
+    @application.get("/healthz", response_class=PlainTextResponse)
+    def healthz() -> str:
+        return "You did it, you beautiful baby"
 
     @application.post(
         "/api/indoor",
