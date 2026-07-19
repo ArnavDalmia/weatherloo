@@ -146,3 +146,50 @@ def test_retrieval_of_saved_records(client: TestClient) -> None:
     assert len(records) == 1
     assert records[0]["pod_id"] == "DC_LIBRARY_INDOOR_01"
     assert records[0]["received_at"].endswith("Z")
+
+
+def test_delete_indoor_clears_only_that_table(client: TestClient) -> None:
+    client.post("/api/indoor", json=indoor_payload())
+    client.post(
+        "/api/outdoor",
+        json={
+            "location_id": "UNIVERSITY_OF_WATERLOO",
+            "temperature_c": 29.4,
+            "relative_humidity_percent": 63.0,
+        },
+    )
+
+    response = client.delete("/api/indoor")
+    assert response.status_code == 200
+    assert response.json() == {"status": "cleared", "deleted": 1}
+
+    assert client.get("/api/indoor").json() == []
+    assert len(client.get("/api/outdoor").json()) == 1
+
+
+def test_reset_clears_all_tables(client: TestClient) -> None:
+    client.post("/api/indoor", json=indoor_payload())
+    client.post(
+        "/api/outdoor",
+        json={
+            "location_id": "UNIVERSITY_OF_WATERLOO",
+            "temperature_c": 29.4,
+            "relative_humidity_percent": 63.0,
+        },
+    )
+    client.post("/api/survey-answer", json=survey_payload())
+
+    response = client.delete("/api/reset")
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "cleared",
+        "deleted": {
+            "indoor_readings": 1,
+            "outdoor_readings": 1,
+            "survey_answers": 1,
+        },
+    }
+
+    assert client.get("/api/indoor").json() == []
+    assert client.get("/api/outdoor").json() == []
+    assert client.get("/api/survey-answers").json() == []

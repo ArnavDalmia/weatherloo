@@ -16,9 +16,11 @@ from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from app.config import Settings, load_settings
 from app.database import Database
 from app.schemas import (
+    ClearedResponse,
     HealthResponse,
     IndoorReadingCreate,
     OutdoorReadingCreate,
+    ResetResponse,
     SavedResponse,
     SurveyAnswerCreate,
 )
@@ -232,6 +234,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return csv_response(
             database, "survey_answers", "survey-answers.csv"
         )
+
+    @application.delete("/api/indoor", response_model=ClearedResponse)
+    def delete_indoor() -> ClearedResponse:
+        return ClearedResponse(deleted=database.clear_table("indoor_readings"))
+
+    @application.delete("/api/outdoor", response_model=ClearedResponse)
+    def delete_outdoor() -> ClearedResponse:
+        return ClearedResponse(deleted=database.clear_table("outdoor_readings"))
+
+    @application.delete("/api/survey-answers", response_model=ClearedResponse)
+    def delete_survey_answers() -> ClearedResponse:
+        return ClearedResponse(deleted=database.clear_table("survey_answers"))
+
+    @application.delete("/api/reset", response_model=ResetResponse)
+    def reset_database() -> ResetResponse:
+        deleted = {
+            "indoor_readings": database.clear_table("indoor_readings"),
+            "outdoor_readings": database.clear_table("outdoor_readings"),
+            "survey_answers": database.clear_table("survey_answers"),
+        }
+        return ResetResponse(deleted=deleted)
 
     return application
 

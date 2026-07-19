@@ -69,3 +69,13 @@ class SavedResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: Literal["ok"] = "ok"
+
+
+class ClearedResponse(BaseModel):
+    status: Literal["cleared"] = "cleared"
+    deleted: int
+
+
+class ResetResponse(BaseModel):
+    status: Literal["cleared"] = "cleared"
+    deleted: dict[str, int]

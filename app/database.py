@@ -109,3 +109,14 @@ class Database:
                 f"SELECT {column_sql} FROM {table} ORDER BY id ASC"
             ).fetchall()
         return columns, rows
+
+    def clear_table(self, table: str) -> int:
+        """Delete every row from a known table. Callers must only pass a
+        table name from TABLE_COLUMNS, never raw user input."""
+        if table not in TABLE_COLUMNS:
+            raise ValueError(f"Unknown table: {table}")
+
+        with self.connection() as connection:
+            cursor = connection.execute(f"DELETE FROM {table}")
+            connection.commit()
+            return cursor.rowcount

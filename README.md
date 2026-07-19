@@ -91,12 +91,25 @@ schema and validation ranges.
 - `GET /api/export/indoor.csv`
 - `GET /api/export/outdoor.csv`
 - `GET /api/export/survey-answers.csv`
+- `DELETE /api/indoor`
+- `DELETE /api/outdoor`
+- `DELETE /api/survey-answers`
+- `DELETE /api/reset`
 
 List endpoints return newest records first and accept `limit` (default 100,
 maximum 1000), `start_time`, and `end_time`. Indoor supports `pod_id`; outdoor
 supports `location_id`; survey answers support `survey_session_id`,
 `location_id`, and `pod_id`. Time filters apply to `recorded_at` or
 `answered_at`, as appropriate.
+
+The `DELETE` endpoints permanently erase rows and cannot be undone. Each
+per-table endpoint clears only that table and returns the number of rows
+deleted, e.g. `{"status": "cleared", "deleted": 12}`. `DELETE /api/reset`
+clears all three tables in one call and returns a per-table breakdown, e.g.
+`{"status": "cleared", "deleted": {"indoor_readings": 12, "outdoor_readings": 4, "survey_answers": 30}}`.
+These endpoints are public, like every other endpoint in this project—anyone
+with the URL can wipe the database, so only rely on this for a
+testing/demo deployment.
 
 ## Example requests
 
@@ -178,6 +191,15 @@ Download complete CSV exports:
 curl -OJ http://127.0.0.1:8000/api/export/indoor.csv
 curl -OJ http://127.0.0.1:8000/api/export/outdoor.csv
 curl -OJ http://127.0.0.1:8000/api/export/survey-answers.csv
+```
+
+Clear data when needed:
+
+```bash
+curl -X DELETE http://127.0.0.1:8000/api/indoor
+curl -X DELETE http://127.0.0.1:8000/api/outdoor
+curl -X DELETE http://127.0.0.1:8000/api/survey-answers
+curl -X DELETE http://127.0.0.1:8000/api/reset   # clears all three tables
 ```
 
 The database, WAL, and shared-memory files under `data/` are ignored by Git.
